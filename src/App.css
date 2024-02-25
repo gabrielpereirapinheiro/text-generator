@@ -1,12 +1,40 @@
 .App {
   text-align: center;
 }
+.footer{
+  position: fixed;
+    bottom: 70px;
+    width: 100%;
+}
 
+#title{
+  margin-bottom: 40px;
+}
+
+#back{
+  position: absolute;
+  left: 10px;
+  width: 120px;
+}
+
+#next{
+  position: absolute;
+  width: 120px;
+  right: 10px;
+}
+.tablist2{
+  justify-content:center
+}
 .Steps {
   min-height: 100vh;
   text-align: center;
 }
 
+.teste{
+  border-color: #719ECE;
+    box-shadow: 0 0 10px #719ECE;
+    height: 50vh;
+}
 
 .App-logo {
   height: 40vmin;
