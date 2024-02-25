@@ -17,6 +17,15 @@
   width: 120px;
 }
 
+#cancel{
+  position: fixed;
+    bottom: 90px;
+    align-items: center;
+    width: 94%;
+    left: 0;
+    margin: 3%;
+}
+
 #next{
   position: absolute;
   width: 120px;
@@ -41,11 +50,34 @@
   pointer-events: none;
 }
 
+#textcopy{
+  height: 40vh;
+}
+
+#myinput {
+  accent-color:#319795
+}
+
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
-    /* animation: App-logo-spin infinite 20s linear; */
     margin: 10px;
   }
+
+    .logo-animation {
+      animation: createBox infinite 1s linear;
+      margin: 10px;
+    }
+
+  img {
+      transition: -webkit-transform 0.25s ease;
+      transition: transform 0.25s ease;
+    }
+  
+    img:active {
+      -webkit-transform: scale(2);
+      transform: scale(2);
+    }
 }
 
 .App-header {
@@ -69,5 +101,16 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+
+@keyframes createBox {
+  from {
+    transform: scale(0.9);
+  }
+
+  to {
+    transform: scale(10);
   }
 }

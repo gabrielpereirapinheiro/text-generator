@@ -14,7 +14,7 @@ const screens = [
     type: "options",
     options: [
       { label: "Masculino", value: "Femenino" },
-      { label: "Femenino", value: "Femenino" },
+      { label: "Feminino", value: "Feminino" },
     ],
     text: "do sexo <replace> ",
   },

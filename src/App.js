@@ -16,7 +16,7 @@ function App() {
       {!start ? (
         <div className="App">
           <header className="App-header">
-            <img src={logo} className="App-logo" alt="logo" />
+            <img src={logo} className={"App-logo"} alt="logo" />
             <Button
               onClick={() => {
                 setStart(true);
@@ -30,7 +30,6 @@ function App() {
             >
               Novo paciente
             </Button>
-
             {data.length ? (
               <>
                 Salvos

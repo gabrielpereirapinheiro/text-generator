@@ -78,7 +78,7 @@ const copy = (toast, aux) => {
   navigator.clipboard.writeText(aux);
   toast({
     title: "Texto copiado",
-    description: "O texto formatado agora esta na sua area de copia e cola",
+    description: "O texto formatado agora esta na sua área de transferência",
     status: "success",
     duration: 4000,
     isClosable: true,
@@ -117,24 +117,35 @@ const textGenerator = (info, value, toast, props) => {
 
   return (
     <>
-      <Heading>{info.title}</Heading>
+      <Heading id="title">{info.title}</Heading>
       <Textarea
         resize="vertical"
         size="lg"
+        id="textcopy"
         className="teste"
         isDisabled
         placeholder={aux}
       />
-      <Button onClick={() => copy(toast, aux)}>Copiar</Button>
-      <Button
-        onClick={() => {
-          copy(toast, aux);
-          save(aux, props, value);
-          setStart(false);
-        }}
-      >
-        Copiar e Salvar
-      </Button>
+      <Stack direction="row" margin="10" justify="center" spacing={4}>
+        <Button
+          colorScheme="teal"
+          variant="solid"
+          onClick={() => copy(toast, aux)}
+        >
+          Copiar
+        </Button>
+        <Button
+          colorScheme="teal"
+          variant="solid"
+          onClick={() => {
+            copy(toast, aux);
+            save(aux, props, value);
+            setStart(false);
+          }}
+        >
+          Copiar e Salvar
+        </Button>
+      </Stack>
     </>
   );
 };
@@ -182,6 +193,7 @@ function Steps(props) {
       <Box>
         <input
           type="range"
+          id="myinput"
           min="0"
           max={steps.length - 1}
           value={tabIndex}
@@ -210,17 +222,45 @@ function Steps(props) {
           </TabPanels>
         </Tabs>
       </Box>
+
+      <Button
+        onClick={() => {
+          props.setStart(false);
+
+          toast({
+            title: "Cancelado",
+            description: "Paciente cancelado",
+            status: "warning",
+            duration: 9000,
+            isClosable: true,
+          });
+        }}
+        colorScheme="red"
+        variant="outline"
+        id="cancel"
+      >
+        Cancelar
+      </Button>
+
       <Stack class="footer" direction="row" spacing={4}>
         <Button
-          onClick={() => setTabIndex(tabIndex - 1)}
+          onClick={() =>
+            setTabIndex(tabIndex - 1 < 0 ? tabIndex : tabIndex - 1)
+          }
+          isDisabled={tabIndex == 0 ? true : false}
           colorScheme="teal"
-          variant="solid"
+          variant="outline"
           id="back"
         >
           Voltar
         </Button>
         <Button
-          onClick={() => setTabIndex(tabIndex + 1)}
+          onClick={() =>
+            setTabIndex(
+              tabIndex + 1 > steps.length - 1 ? tabIndex : tabIndex + 1
+            )
+          }
+          isDisabled={tabIndex == steps.length - 1 ? true : false}
           colorScheme="teal"
           variant="outline"
           id="next"
