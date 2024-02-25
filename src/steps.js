@@ -27,17 +27,23 @@ const updateInput = async (e, info, value, setValue) => {
   setValue(aux);
 };
 
-const inputQuestion = (info, value, setValue) => {
-  console.log(value[info.id - 1]);
-  console.log(value);
+const inputQuestion = (info, value, setValue, props) => {
+  console.log(props);
+
+  const isSaved = props.existingOne ? props.existingOne[0] : false;
+
   return (
     <>
       <Heading id="title">{info.title}</Heading>
-      <Input
-        // value={value[info.id - 1]}
-        onChange={(event) => updateInput(event, info, value, setValue)}
-        placeholder={info.placeholder}
-      />
+      {isSaved ? (
+        isSaved
+      ) : (
+        <Input
+          // value={value[info.id - 1]}
+          onChange={(event) => updateInput(event, info, value, setValue)}
+          placeholder={info.placeholder}
+        />
+      )}
     </>
   );
 };
@@ -87,10 +93,22 @@ const copy = (toast, aux) => {
 
 const save = (aux, props, value) => {
   const { setStart, data, setData } = props;
-
-  let auxData = data;
-  auxData.push({ id: value[0], data: value });
-  setData(auxData);
+  const isNew = !!props.existingOne.length;
+  console.log(props);
+  if (!isNew) {
+    let auxData = data;
+    auxData.push({ id: value[0], data: value, roomId: props.nextId });
+    setData(auxData);
+  } else {
+    let modified = data.map((item) => {
+      if (item.roomId === props.nextId) {
+        return { id: value[0], data: value, roomId: item.roomId };
+      } else {
+        return item;
+      }
+    });
+    setData(modified);
+  }
 };
 
 const textGenerator = (info, value, toast, props) => {
@@ -114,7 +132,9 @@ const textGenerator = (info, value, toast, props) => {
     });
   }
   const { setStart, data, setData } = props;
-
+  const label = props.existingOne.length
+    ? "Copiar e atualizar"
+    : "Copiar e salvar";
   return (
     <>
       <Heading id="title">{info.title}</Heading>
@@ -143,7 +163,7 @@ const textGenerator = (info, value, toast, props) => {
             setStart(false);
           }}
         >
-          Copiar e Salvar
+          {label}
         </Button>
       </Stack>
     </>
@@ -157,7 +177,7 @@ const findScreen = (id, value, setValue, toast, props, setTabIndex) => {
 
   switch (screen[0].type) {
     case "input":
-      return inputQuestion(screen[0], value, setValue, setTabIndex);
+      return inputQuestion(screen[0], value, setValue, props);
     case "options":
       return optionsQuestion(screen[0], value, setValue, setTabIndex);
     case "generator":
@@ -200,12 +220,17 @@ function Steps(props) {
           onChange={handleSliderChange}
         />
 
-        <Tabs index={tabIndex} onChange={handleTabsChange}>
-          <TabList class="tablist2">
+        <Tabs
+          variant="solid-rounded"
+          index={tabIndex}
+          colorScheme="teal"
+          onChange={handleTabsChange}
+        >
+          {/* <TabList variant="enclosed" id="mytab" class="tablist2">
             {steps.map((item) => (
               <Tab>{item}</Tab>
             ))}
-          </TabList>
+          </TabList> */}
           <TabPanels>
             {steps.map((item) => (
               <TabPanel>
@@ -231,7 +256,7 @@ function Steps(props) {
             title: "Cancelado",
             description: "Paciente cancelado",
             status: "warning",
-            duration: 9000,
+            duration: 3000,
             isClosable: true,
           });
         }}

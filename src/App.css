@@ -17,6 +17,10 @@
   width: 120px;
 }
 
+#mytab{
+  justify-content: center
+}
+
 #cancel{
   position: fixed;
     bottom: 90px;

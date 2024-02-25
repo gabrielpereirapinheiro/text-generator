@@ -33,7 +33,7 @@ function App() {
             {data.length ? (
               <>
                 Salvos
-                {data.map((item) => {
+                {data.map((item, index) => {
                   return (
                     <Button
                       onClick={() => {
@@ -46,7 +46,7 @@ function App() {
                       border="2px"
                       borderColor="green.500"
                     >
-                      {item.id}
+                      {index} -{item.id}
                     </Button>
                   );
                 })}
@@ -60,6 +60,7 @@ function App() {
         <Steps
           existingOne={existingOne}
           data={data}
+          nextId={data.length ? data.length : 1}
           setData={setData}
           setStart={setStart}
         />
