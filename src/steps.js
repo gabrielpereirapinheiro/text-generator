@@ -19,6 +19,7 @@ import { Heading, Stack } from "@chakra-ui/react";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react";
 import { Textarea } from "@chakra-ui/react";
+import { useCookies } from "react-cookie";
 
 const updateInput = async (e, info, value, setValue) => {
   let aux = value;
@@ -27,16 +28,33 @@ const updateInput = async (e, info, value, setValue) => {
   setValue(aux);
 };
 
-const inputQuestion = (info, value, setValue, props) => {
+const inputQuestion = (
+  info,
+  value,
+  setValue,
+  props,
+  updateName,
+  setUpdateName
+) => {
   console.log(props);
-
   const isSaved = props.existingOne ? props.existingOne[0] : false;
 
   return (
     <>
       <Heading id="title">{info.title}</Heading>
-      {isSaved ? (
-        isSaved
+      {isSaved && !updateName ? (
+        <>
+          <Input isDisabled value={isSaved} />
+
+          <Button
+            onClick={() => {
+              setUpdateName(true);
+            }}
+          >
+            {" "}
+            Alterar nome
+          </Button>
+        </>
       ) : (
         <Input
           // value={value[info.id - 1]}
@@ -80,24 +98,53 @@ const optionsQuestion = (info, value, setValue, setTabIndex) => {
   );
 };
 
-const copy = (toast, aux) => {
-  navigator.clipboard.writeText(aux);
-  toast({
-    title: "Texto copiado",
-    description: "O texto formatado agora esta na sua área de transferência",
-    status: "success",
-    duration: 4000,
-    isClosable: true,
-  });
+const copy = (
+  toast,
+  aux,
+  props,
+  tabsMissing,
+  setTabIndex,
+  value,
+  setStart,
+  setCookie,
+  shouldSave
+) => {
+  const isNew = !!props.existingOne.length;
+  console.log("should save");
+  console.log("should save");
+  console.log(shouldSave);
+  if (aux.includes("MISSING")) {
+    setTabIndex(tabsMissing[0]);
+    toast({
+      title: "Itens nao preenchidos",
+      status: "error",
+      duration: 4000,
+      isClosable: true,
+    });
+  } else {
+    navigator.clipboard.writeText(aux);
+    toast({
+      title: "Texto copiado",
+      description: "O texto formatado agora esta na sua área de transferência",
+      status: "success",
+      duration: 4000,
+      isClosable: true,
+    });
+    if (shouldSave) {
+      save(aux, props, value, setCookie);
+      setStart(false);
+    }
+  }
 };
 
-const save = (aux, props, value) => {
+const save = (aux, props, value, setCookie) => {
   const { setStart, data, setData } = props;
   const isNew = !!props.existingOne.length;
   console.log(props);
   if (!isNew) {
     let auxData = data;
     auxData.push({ id: value[0], data: value, roomId: props.nextId });
+    setCookie("data", auxData);
     setData(auxData);
   } else {
     let modified = data.map((item) => {
@@ -107,17 +154,18 @@ const save = (aux, props, value) => {
         return item;
       }
     });
+    setCookie("data", modified);
     setData(modified);
   }
 };
 
-const textGenerator = (info, value, toast, props) => {
+const textGenerator = (info, value, toast, props, setTabIndex, setCookie) => {
   const checkArrays = true;
-
+  let tabsMissing = [];
   let aux = "";
 
   if (checkArrays) {
-    steps.forEach((step) => {
+    steps.forEach((step, index) => {
       if (step !== steps.length) {
         let screen = screens.filter((item) => {
           return item.id === step;
@@ -126,11 +174,14 @@ const textGenerator = (info, value, toast, props) => {
         let toreplace = value[screen[0].id - 1].length
           ? value[screen[0].id - 1]
           : "MISSING";
+
+        if (toreplace === "MISSING") tabsMissing.push(screen[0].id - 1);
         let replace = screen[0].text.replace("<replace>", toreplace);
-        aux = aux + replace;
+        if (!replace.includes("Pular esta opção")) aux = aux + replace;
       }
     });
   }
+
   const { setStart, data, setData } = props;
   const label = props.existingOne.length
     ? "Copiar e atualizar"
@@ -150,7 +201,19 @@ const textGenerator = (info, value, toast, props) => {
         <Button
           colorScheme="teal"
           variant="solid"
-          onClick={() => copy(toast, aux)}
+          onClick={() =>
+            copy(
+              toast,
+              aux,
+              props,
+              tabsMissing,
+              setTabIndex,
+              value,
+              setStart,
+              setCookie,
+              false
+            )
+          }
         >
           Copiar
         </Button>
@@ -158,9 +221,17 @@ const textGenerator = (info, value, toast, props) => {
           colorScheme="teal"
           variant="solid"
           onClick={() => {
-            copy(toast, aux);
-            save(aux, props, value);
-            setStart(false);
+            copy(
+              toast,
+              aux,
+              props,
+              tabsMissing,
+              setTabIndex,
+              value,
+              setStart,
+              setCookie,
+              true
+            );
           }}
         >
           {label}
@@ -170,18 +241,42 @@ const textGenerator = (info, value, toast, props) => {
   );
 };
 
-const findScreen = (id, value, setValue, toast, props, setTabIndex) => {
+const findScreen = (
+  id,
+  value,
+  setValue,
+  toast,
+  props,
+  setTabIndex,
+  setCookie,
+  updateName,
+  setUpdateName
+) => {
   let screen = screens.filter((item) => {
     return item.id === id;
   });
 
   switch (screen[0].type) {
     case "input":
-      return inputQuestion(screen[0], value, setValue, props);
+      return inputQuestion(
+        screen[0],
+        value,
+        setValue,
+        props,
+        updateName,
+        setUpdateName
+      );
     case "options":
       return optionsQuestion(screen[0], value, setValue, setTabIndex);
     case "generator":
-      return textGenerator(screen[0], value, toast, props);
+      return textGenerator(
+        screen[0],
+        value,
+        toast,
+        props,
+        setTabIndex,
+        setCookie
+      );
     default:
       return "erro";
   }
@@ -189,6 +284,8 @@ const findScreen = (id, value, setValue, toast, props, setTabIndex) => {
 
 function Steps(props) {
   const { existingOne } = props;
+  const [cookies, setCookie] = useCookies(["name"]);
+
   let inital;
   if (existingOne.length) {
     inital = existingOne;
@@ -199,6 +296,7 @@ function Steps(props) {
   const toast = useToast();
 
   const [stepValue, setStepValue] = useState(inital);
+  const [updateName, setUpdateName] = useState(false);
 
   const handleSliderChange = (event) => {
     setTabIndex(parseInt(event.target.value, 10));
@@ -240,7 +338,10 @@ function Steps(props) {
                   setStepValue,
                   toast,
                   props,
-                  setTabIndex
+                  setTabIndex,
+                  setCookie,
+                  updateName,
+                  setUpdateName
                 )}
               </TabPanel>
             ))}
